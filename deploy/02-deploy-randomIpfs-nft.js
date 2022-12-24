@@ -9,6 +9,10 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
     const chainId = network.config.chainId;
     let vrfCoordinatorV2MockAddress, subscriptionId;
 
+    if (process.env.UPLOAD_TO_PINATA == "true") {
+        await handleTokenUris();
+    }
+
     const sampleMetaData = {
         name: "",
         description: "",
@@ -30,35 +34,32 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
         vrfCoordinatorV2MockAddress = networkConfig[chainId].vrfCoordinator;
         subscriptionId = networkConfig[chainId].subscriptionId;
     }
-    if (process.env.UPLOAD_TO_PINATA == "true") {
-        await handleTokenUris();
-    }
 
-    await storeImages(imagesLocation);
+    // await storeImages(imagesLocation);
+
+    // const args = [
+    //     vrfCoordinatorV2MockAddress,
+    //     networkConfig[chainId].gasLane,
+    //     networkConfig[chainId].callbackGasLimit,
+    //     subscriptionId,
+    //     //tokenUris
+    //     networkConfig[chainId].mintFee,
+    // ];
+    // const randomIpfs = await deploy("RandomIpfsNft", {
+    //     from: deployer,
+    //     log: true,
+    //     args: args,
+    //     waitConfirmations: 1,
+    // });
+};
+
+async function handleTokenUris() {
+    tokenUris = [];
+    //upload images to ipfs
+    //upload metadata to ipfs
+
+    const { responses: imageUploadResponses, files } = await storeImages(imagesLocation);
     /**
-     * 
-    const args = [
-        vrfCoordinatorV2MockAddress,
-        networkConfig[chainId].gasLane,
-        networkConfig[chainId].callbackGasLimit,
-        subscriptionId,
-        //tokenUris
-        networkConfig[chainId].mintFee,
-    ];
-    const randomIpfs = await deploy("RandomIpfsNft", {
-        from: deployer,
-        log: true,
-        args: args,
-        waitConfirmations: 1,
-    });
-     */
-    async function handleTokenUris() {
-        tokenUris = [];
-        //upload images to ipfs
-        //upload metadata to ipfs
-
-        const { responses: imageUploadResponses, files } = await storeImages(imagesLocation);
-        /**
          * 
         for (imageUploadResponseIndex in imageUploadResponses) {
             let tokenUriMetadata = [...sampleMetaData]; //unpacking sampleMetaData
@@ -74,12 +75,11 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
             tokenUris.push(`ipfs://${metadataUploadResponse.IpfsHash}`);
         }
          */
-        console.log("tokenUris uploaded to ipfs");
-        console.log("they are...");
-        console.log(tokenUris);
+    console.log("tokenUris uploaded to ipfs");
+    console.log("they are...");
+    console.log(tokenUris);
 
-        return tokenUris;
-    }
-};
+    return tokenUris;
+}
 
 module.exports.tags = ["randomIpfs", "all", "main"];
